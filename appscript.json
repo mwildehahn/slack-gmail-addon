@@ -1,0 +1,24 @@
+{
+  "timeZone": "GMT",
+  "oauthScopes": [
+    "https://www.googleapis.com/auth/gmail.addons.execute",
+    "https://www.googleapis.com/auth/script.external_request",
+    "https://www.googleapis.com/auth/script.storage"
+  ],
+  "urlFetchWhitelist": [
+    "https://slack.com/api/conversations.list"
+  ],
+  "gmail": {
+    "version": "TRUSTED_TESTER_V2",
+    "name": "Slack",
+    "logoUrl": "https://www.gstatic.com/images/icons/material/system/1x/send_black_24dp.png",
+    "universalActions": [
+        {
+            "text": "Send to Slack",
+            "runFunction": "handleSendToSlack"
+        }
+    ],
+    "primaryColor": "#666666",
+    "secondaryColor": "#666666"
+  }
+}

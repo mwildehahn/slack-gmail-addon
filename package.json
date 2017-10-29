@@ -1,0 +1,25 @@
+{
+  "name": "slack-gmail-addon",
+  "version": "0.0.1",
+  "description": "Gmail Add-on to send emails into Slack",
+  "main": "dist/main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "ts:build": "tsc",
+    "ts:watch": "tsc -w"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mwildehahn/slack-gmail-addon.git"
+  },
+  "author": "Michael Hahn",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/mwildehahn/slack-gmail-addon/issues"
+  },
+  "homepage": "https://github.com/mwildehahn/slack-gmail-addon#readme",
+  "devDependencies": {
+    "@types/google-apps-script": "0.0.17",
+    "@types/node": "^8.0.47"
+  }
+}
