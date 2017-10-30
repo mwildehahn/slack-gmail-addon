@@ -1,12 +1,5 @@
 type GmailActionEvent = GoogleAppsScript.Gmail.GmailActionEvent
 
-function handleSendToSlack(event: GmailActionEvent): Array<Object> {
-  const card = buildFormCard()
-  return CardService.newUniversalActionResponseBuilder()
-    .displayAddOnCards([card])
-    .build()
-}
-
 function buildFormCard(): Object {
   const card = CardService.newCardBuilder()
   card.setHeader(CardService.newCardHeader().setTitle("Send to Slack"))
@@ -75,6 +68,13 @@ function buildSentCard(event: GmailActionEvent): Object {
   return card.build()
 }
 
+function handleSendToSlack(event: GmailActionEvent): Array<Object> {
+  const card = buildFormCard()
+  return CardService.newUniversalActionResponseBuilder()
+    .displayAddOnCards([card])
+    .build()
+}
+
 function handleSendAction(event: GmailActionEvent): Object {
   const card = buildSentCard(event)
   const nav = CardService.newNavigation()
@@ -111,6 +111,19 @@ function handleAutoCompleteAction(event: GmailActionEvent): Object {
   return CardService.newSuggestionsResponseBuilder()
     .setSuggestions(CardService.newSuggestions().addSuggestions(suggestions))
     .build()
+}
+
+function handleAuthCheck() {
+  callApi("auth.test")
+}
+
+function handleAuth(request: any) {
+  const service = getOAuthService()
+  const isAuthorized = service.handleCallback(request)
+  if (isAuthorized) {
+    return HtmlService.createHtmlOutput("Success! You can close this tab.")
+  }
+  return HtmlService.createHtmlOutput("Denied. You can close this tab.")
 }
 
 function getChannelNames(): Array<string> {
@@ -164,13 +177,17 @@ function sendMessage(channel: string, email: string, comment?: string): void {
   return callApi("chat.postMessage", payload)
 }
 
-function callApi(method: string, data: any): any {
-  const properties = PropertiesService.getScriptProperties()
+function callApi(method: string, data: any = {}): any {
+  const service = getOAuthService()
+  if (!service.hasAccess()) {
+    throwAuthorizationError(service)
+  }
 
-  const token = properties.getProperty("SLACK_TOKEN")
+  const properties = PropertiesService.getScriptProperties()
   const apiBase = properties.getProperty("SLACK_API_BASE_URL")
 
-  const endpoint = `${apiBase}/conversations.list`
+  const token = service.getAccessToken()
+  const endpoint = `${apiBase}/${method}`
   data.token = token
 
   const options = {
@@ -179,6 +196,48 @@ function callApi(method: string, data: any): any {
   }
 
   const response = UrlFetchApp.fetch(endpoint, options)
+  if (response.getResponseCode() != 200) {
+    console.error("Error calling API", response)
+    throw new Error("Error calling API")
+  }
   const content = response.getContentText()
-  return JSON.parse(content)
+  const json = JSON.parse(content)
+
+  const authErrors = ["not_authed", "invalid_auth", "invalid_code"]
+  if (!json.ok && authErrors.includes(json.error)) {
+    throwAuthorizationError(service)
+  } else if (!json.ok) {
+    console.error("API call failed", json)
+    throw new Error("API call failed")
+  }
+
+  return json
+}
+
+function throwAuthorizationError(service) {
+  CardService.newAuthorizationException()
+    .setAuthorizationUrl(service.getAuthorizationUrl())
+    .setResourceDisplayName("Connect to Slack")
+    .throwException()
+}
+
+function getOAuthService(): any {
+  const properties = PropertiesService.getScriptProperties()
+
+  const authorizationUrl = properties.getProperty(
+    "SLACK_OAUTH_AUTHORIZATION_URL"
+  )
+  const tokenUrl = properties.getProperty("SLACK_OAUTH_TOKEN_URL")
+  const clientId = properties.getProperty("SLACK_CLIENT_ID")
+  const clientSecret = properties.getProperty("SLACK_CLIENT_SECRET")
+
+  return OAuth2.createService("Slack")
+    .setAuthorizationBaseUrl(authorizationUrl)
+    .setTokenUrl(tokenUrl)
+    .setClientId(clientId)
+    .setClientSecret(clientSecret)
+    .setCallbackFunction("handleAuth")
+    .setCache(CacheService.getUserCache())
+    .setScope("channels:read groups:read im:read mpim:read")
+    .setPropertyStore(PropertiesService.getUserProperties())
 }

@@ -1,24 +1,26 @@
 {
   "timeZone": "GMT",
-  "oauthScopes": [
-    "https://www.googleapis.com/auth/gmail.addons.execute",
-    "https://www.googleapis.com/auth/script.external_request",
-    "https://www.googleapis.com/auth/script.storage"
-  ],
-  "urlFetchWhitelist": [
-    "https://slack.com/api/conversations.list"
-  ],
+  "dependencies": {
+    "libraries": [{
+      "userSymbol": "OAuth2",
+      "libraryId": "1B7FSrk5Zi6L1rSxxTDgDEUsPzlukDsi4KGuTMorsTQHhGBzBkMun4iDF",
+      "version": "23",
+      "developmentMode": true
+    }]
+  },
+  "oauthScopes": ["https://www.googleapis.com/auth/gmail.addons.execute", "https://www.googleapis.com/auth/script.external_request", "https://www.googleapis.com/auth/script.storage"],
+  "urlFetchWhitelist": ["https://slack.com/"],
   "gmail": {
-    "version": "TRUSTED_TESTER_V2",
     "name": "Slack",
     "logoUrl": "https://www.gstatic.com/images/icons/material/system/1x/send_black_24dp.png",
-    "universalActions": [
-        {
-            "text": "Send to Slack",
-            "runFunction": "handleSendToSlack"
-        }
-    ],
+    "universalActions": [{
+      "text": "Send to Slack",
+      "runFunction": "handleSendToSlack"
+    }],
     "primaryColor": "#666666",
-    "secondaryColor": "#666666"
+    "secondaryColor": "#666666",
+    "authorizationCheckFunction": "handleAuthCheck",
+    "openLinkUrlPrefixes": ["https://slack.com/"],
+    "version": "TRUSTED_TESTER_V2"
   }
 }
