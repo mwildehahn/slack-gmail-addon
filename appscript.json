@@ -12,7 +12,7 @@
   "urlFetchWhitelist": ["https://slack.com/"],
   "gmail": {
     "name": "Slack",
-    "logoUrl": "https://www.gstatic.com/images/icons/material/system/1x/send_black_24dp.png",
+    "logoUrl": "https://upload.wikimedia.org/wikipedia/commons/7/76/Slack_Icon.png",
     "universalActions": [{
       "text": "Send to Slack",
       "runFunction": "handleSendToSlack"
