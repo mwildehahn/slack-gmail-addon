@@ -19,6 +19,7 @@ function buildFormCard(): Object {
   section.addWidget(
     CardService.newTextInput()
       .setFieldName("comment")
+      .setMultiline(true)
       .setTitle("Comment")
   )
 
